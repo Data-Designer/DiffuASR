@@ -63,11 +63,11 @@ class Generator(object):
             #nfeedback = len(User[user])
             if nfeedback < 3:
             #if nfeedback < 5:
-                user_train[user] = User[user]
+                user_train[user] = User[user] # only for train
                 user_valid[user] = []
                 user_test[user] = []
             else:
-                user_train[user] = User[user][:-2]
+                user_train[user] = User[user][:-2] # for train
                 #user_train[user] = User[user][:-4]
                 user_valid[user] = []
                 user_valid[user].append(User[user][-2])
