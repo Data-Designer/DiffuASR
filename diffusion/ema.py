@@ -5,6 +5,7 @@ import torch.nn as nn
 
 
 class EMAHelper(object):
+    # 参数更新平滑的作用
     def __init__(self, mu=0.999):
         self.mu = mu
         self.shadow = {}
