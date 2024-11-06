@@ -370,25 +370,25 @@ class DiffusionModel_CG(DiffusionModel):
         # get the classifier label
         if self.guide_type == "item":
             first_index = -torch.sum(guidance>0, dim=-1)
-            y = guidance[range(guidance.shape[0]), first_index.squeeze()]
+            y = guidance[range(guidance.shape[0]), first_index.squeeze()] # 相似度第一的item
             guide = self.item_emb(y).detach().requires_grad_(True)
         elif self.guide_type == "cond":
-            guide = guide_vector.detach().requires_grad_(True)
+            guide = guide_vector.detach().requires_grad_(True) # 直接用emb
         elif self.guide_type == "seq":
-            guide = self.item_emb(guidance) * (guidance > 0).unsqueeze(-1)
+            guide = self.item_emb(guidance) * (guidance > 0).unsqueeze(-1) # 直接用序列进行引导
             guide = guide.detach().requires_grad_(True)
         elif self.guide_type == 'bpr':
             guide = self.item_emb(guidance) * (guidance > 0).unsqueeze(-1)
             neg = torch.randint_like(guidance, 1, self.mask_token-1, device=self.dev)
-            guide_neg = self.item_emb(neg.long()) * (guidance > 0).unsqueeze(-1)
+            guide_neg = self.item_emb(neg.long()) * (guidance > 0).unsqueeze(-1) # rank进行引导
             guide = (guide, guide_neg)
         else:
             raise ValueError
 
         xt, noise = q_xt_x0(x0, t, self.alpha_bar)  # xt: (bs, 1, seq_len, hidden_size), noise: (bs, 1, seq_len, hidden_size)
         pred_noise = self.unet(xt.squeeze().float(), t, guide_vector)
-        grad = self.cond_fn(xt, guide)
-        pred_noise = pred_noise - (1 - self.alpha_bar).sqrt()[0] * grad
+        grad = self.cond_fn(xt, guide) # 计算梯度
+        pred_noise = pred_noise - (1 - self.alpha_bar).sqrt()[0] * grad # 梯度偏向
 
         loss = F.mse_loss(noise.float(), pred_noise.unsqueeze(1)) # noise prediction
 
@@ -484,7 +484,7 @@ class DiffusionModel_CF(DiffusionModel):
             guide_vector = torch.sum(guidance, dim=1)   # (bs, hidden_size)
 
         xt, noise = q_xt_x0(x0, t, self.alpha_bar)  # xt: (bs, 1, seq_len, hidden_size), noise: (bs, 1, seq_len, hidden_size)
-        pred_noise = self.get_pred_noise(xt, t, guide_vector)
+        pred_noise = self.get_pred_noise(xt, t, guide_vector) # 无条件引导
 
         loss = F.mse_loss(noise.float(), pred_noise.unsqueeze(1))
 
@@ -493,12 +493,12 @@ class DiffusionModel_CF(DiffusionModel):
     
     def predict(self, guidance, item_indices):
 
-        skip = self.n_steps // self.timesteps
+        skip = self.n_steps // self.timesteps # 类似DDIM的操作跳过一些step
         seq = range(0, self.n_steps, skip)
 
         x = torch.randn(guidance.shape[0], 1, self.seq_len, self.hidden_size).to(self.device)  # (bs, 1, seq_len, hidden_size)
 
-        # get the guide vector
+        # get the guide vector, 感觉这一步必须要有啊
         if self.pref:
             mask = self.mask_token * torch.ones(guidance.shape[0], 1, device=self.device)
             mask_emb = self.item_emb(mask.long())
