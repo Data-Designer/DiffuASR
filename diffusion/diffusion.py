@@ -18,7 +18,7 @@ from diffusion.preference import BertPref
 
 
 class DiffusionModel(nn.Module):
-
+    # 纯净的diffusion
     def __init__(self, user_num, item_num, device, args) -> None:
         
         super().__init__()
@@ -130,7 +130,7 @@ class DiffusionModel(nn.Module):
 
     
     def get_alpha(self):
-
+        # 噪声的变化方式
         scale = 1000 / self.n_steps
         beta_start = scale * 0.0001
         beta_end = scale * 0.02
@@ -157,7 +157,7 @@ class DiffusionModel(nn.Module):
 
     
     def token_discrete_loss(self, x_t, input_ids):
-        
+        # Diffusion LM的操作
         logits = self.lm_head(x_t)  # bsz, seqlen, vocab
         # print(logits.shape)
         loss_fct = torch.nn.CrossEntropyLoss(reduction='none')
@@ -277,7 +277,7 @@ class DiffusionModel(nn.Module):
 
 
     def load_preference(self, model):
-
+        # load inference checkpoint
         checkpoint_path = os.path.join(self.rec_path, 'pytorch_model.bin')
 
         model_dict = model.state_dict()
@@ -299,7 +299,7 @@ class DiffusionModel(nn.Module):
 
 
 class DiffusionModel_CG(DiffusionModel):
-
+    # classifier guildance
     def __init__(self, user_num, item_num, device, args) -> None:
 
         super().__init__(user_num, item_num, device, args)
@@ -390,7 +390,7 @@ class DiffusionModel_CG(DiffusionModel):
         grad = self.cond_fn(xt, guide)
         pred_noise = pred_noise - (1 - self.alpha_bar).sqrt()[0] * grad
 
-        loss = F.mse_loss(noise.float(), pred_noise.unsqueeze(1))
+        loss = F.mse_loss(noise.float(), pred_noise.unsqueeze(1)) # noise prediction
 
         return loss
     
@@ -455,7 +455,7 @@ class DiffusionModel_CG(DiffusionModel):
 
 
 class DiffusionModel_CF(DiffusionModel):
-
+    # classifier-free based diffusion
     def __init__(self, user_num, item_num, device, args) -> None:
 
         super().__init__(user_num, item_num, device, args)
