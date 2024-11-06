@@ -509,21 +509,21 @@ class DiffusionModel_CF(DiffusionModel):
 
         n = x.size(0)
         seq_next = [-1] + list(seq[:-1])
-        for i, j in zip(reversed(seq), reversed(seq_next)):
+        for i, j in zip(reversed(seq), reversed(seq_next)): # why正反两次？还是不能理解
             t = (torch.ones(n) * i).to(x.device)
             next_t = (torch.ones(n) * j).to(x.device)
             with torch.no_grad():
                 pred_noise = self.get_pred_noise(x, t, guide_vector)
-                x = p_xt(x, pred_noise.unsqueeze(1), t, next_t, self.beta, self.eta)    # x: (bs, 1, seq_len, hidden_size)
+                x = p_xt(x, pred_noise.unsqueeze(1), t, next_t, self.beta, self.eta)    # x: (bs, 1, seq_len, hidden_size)，forward递归去噪，需要next t进行正向的去噪
         
         item_embs = self.item_emb(item_indices)
-        x = x.squeeze()
+        x = x.squeeze() # B,S,H
 
         logits = []
         for i in range(self.seq_len):
             temp = x[:, i, :].unsqueeze(1).repeat(1, item_embs.shape[1], 1)
             logit = F.cosine_similarity(temp, item_embs, dim=-1)  # (bs, item_num)
-            logits.append(logit)
+            logits.append(logit) # S,B,D, but why?
 
         return logits
     
