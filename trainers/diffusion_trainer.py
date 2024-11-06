@@ -92,11 +92,11 @@ class DiffusionTrainer(Trainer):
 
             avg_loss = self._train_one_epoch(epoch)
 
-            if (epoch+1)%100 == 0:
+            if (epoch+1)%100 == 0:  # 每100个epoch输出结果
 
                 self.eval(epoch)
 
-            self.stopper(-avg_loss, epoch, model_to_save, self.optimizer, self.scheduler)
+            self.stopper(-avg_loss, epoch, model_to_save, self.optimizer, self.scheduler) # 检查是否需要early stop
 
             if self.stopper.early_stop:
 
@@ -125,11 +125,11 @@ class DiffusionTrainer(Trainer):
 
             seq, positions, diff_seq = batch
             seq, positions, diff_seq = seq.long(), positions.long(), diff_seq.long()
-            loss = self.model(diff_seq, seq)
+            loss = self.model(diff_seq, seq) # 后面的序列，前面的序列
             loss_list.append(loss.item())
             loss.backward()
 
-            tr_loss += loss.item()
+            tr_loss += loss.item() # train loss
             nb_tr_examples += 1
             nb_tr_steps += 1
 
