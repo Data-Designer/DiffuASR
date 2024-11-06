@@ -52,7 +52,7 @@ def unzip_data(data, aug=True, aug_num=0):
 
             for i in range(aug_num+2, seq_len+1):
                 
-                res.append(user_seq[:i])
+                res.append(user_seq[:i]) # 是否对原有的user seq进行增强，感觉是个trick
     else:
         for user in tqdm(data):
 
