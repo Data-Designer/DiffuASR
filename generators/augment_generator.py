@@ -18,7 +18,7 @@ class AugmentGenerator(Generator):
 
         #TODO: two data for valid and test respectively?
         #aug_dataset = unzip_data(self.train, aug=False, aug_num=0)
-        aug_dataset = concat_aug_data([self.train, self.valid])
+        aug_dataset = concat_aug_data([self.train, self.valid]) # 这里对吗？你居然把valid扔进去了？性能能不好吗？
         #aug_dataset = concat_data([self.train, self.valid])
         aug_dataset = AugmentDataset(aug_dataset, self.item_num, self.args.max_len)
 
@@ -89,6 +89,6 @@ class AugmentDataset(Dataset):
         positions = [0] * mask_len + positions
         positions = np.array(positions)
 
-        return seq, positions
+        return seq, positions # 这个position不会到头来是guidance吧？
 
 
