@@ -33,12 +33,12 @@ class SeqDataset(Dataset):
             per_neg = random_neq(1, self.item_num+1, non_neg)
             neg.append(per_neg)
             non_neg.append(per_neg)
-        neg = np.array(neg)
+        neg = np.array(neg) # B, neg_num
         #neg = random_neq(1, self.item_num+1, inter)
         
         seq = np.zeros([self.max_len], dtype=np.int32)
         idx = self.max_len - 1
-        for i in reversed(inter[:-1]):
+        for i in reversed(inter[:-1]): # [0,0...,1,3] 反向padding
             seq[idx] = i
             idx -= 1
             if idx == -1:
@@ -53,7 +53,7 @@ class SeqDataset(Dataset):
         
         positions= positions[-self.max_len:]
         positions = [0] * mask_len + positions
-        positions = np.array(positions)
+        positions = np.array(positions) # 位置编码对应的padding.
 
         return seq, pos, neg, positions
 
