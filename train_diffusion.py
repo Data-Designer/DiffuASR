@@ -277,7 +277,7 @@ def main():
                           and not args.no_cuda else "cpu")
 
     # generator is used to manage dataset
-    generator = DiffusionGenerator(args, logger, device)
+    generator = DiffusionGenerator(args, logger, device) # 用于生成diffusion数据的generator
 
     trainer = DiffusionTrainer(args, logger, writer, device, generator)
 
