@@ -137,7 +137,7 @@ class DiffusionTrainDataset(Dataset):
         inter = self.data[index][self.seq_len:]
         diff_seq = copy.deepcopy(self.data[index][:self.seq_len])
         #diff_seq.reverse()  # whether reverse the generated sequences
-        diff_seq = np.array(diff_seq) # 正常的seq
+        diff_seq = np.array(diff_seq) # 正常的seq，【1，3，5】
 
         seq = np.zeros([self.max_len], dtype=np.int32)
         idx = self.max_len - 1
