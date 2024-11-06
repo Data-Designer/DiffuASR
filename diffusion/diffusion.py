@@ -67,7 +67,7 @@ class DiffusionModel(nn.Module):
     
 
     def forward(self, seqs, guidance):
-
+        # 为啥采用这种相对的noise step生成步骤？这些时间步可以用于选择或处理数据中的特定时刻，例如在训练 RNN 或其他序列模型时，通过随机选择正向和反向的时间步来增强模型的鲁棒性。
         t= torch.randint(low=0, high=self.n_steps, size=(self.batch_size // 2 + 1,)).to(self.device) # bs/2+1 random select t for half batch of data
         t = torch.cat([t, self.n_steps - t - 1], dim=0)[:self.batch_size] # (bs), get the random steps for the whole batch
 
@@ -77,14 +77,14 @@ class DiffusionModel(nn.Module):
         if self.pref:
             mask = self.mask_token * torch.ones(guidance.shape[0], 1, device=self.device)
             mask_emb = self.item_emb(mask.long())
-            guide_vector = self.pref_model(guidance, self.item_emb(guidance), mask_emb)
+            guide_vector = self.pref_model(guidance, self.item_emb(guidance), mask_emb) # B,emb
         else:
-            guidance = self.item_emb(guidance) * (guidance > 0).unsqueeze(-1)   # (bs, max_seq_len, hidden_size) 
+            guidance = self.item_emb(guidance) * (guidance > 0).unsqueeze(-1)   # (bs, max_seq_len, hidden_size) 后面这个玩意起到一个mask matrix作用？
             guide_vector = torch.sum(guidance, dim=1)   # (bs, hidden_size)
 
-        xt, noise = q_xt_x0(x0, t, self.alpha_bar)  # xt: (bs, 1, seq_len, hidden_size), noise: (bs, 1, seq_len, hidden_size)
+        xt, noise = q_xt_x0(x0, t, self.alpha_bar)  # xt: (bs, 1, seq_len, hidden_size), noise: (bs, 1, seq_len, hidden_size) forward process
         #pred_noise = self.unet(xt.squeeze().float(), t, guide_vector)
-        pred_noise = self.unet(xt.squeeze().float(), t, guide_vector)
+        pred_noise = self.unet(xt.squeeze().float(), t, guide_vector) # denoise process
 
         loss = F.mse_loss(noise.float(), pred_noise.unsqueeze(1))
 
