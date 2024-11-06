@@ -223,7 +223,7 @@ parser.add_argument("--log",
 parser.add_argument("--aug_num",
                     default=10,
                     type=int,
-                    help="the item number of augmentation")
+                    help="the item number of augmentation") # 生成10个
 parser.add_argument("--aug_file",
                     default="inter",
                     type=str,
