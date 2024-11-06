@@ -22,8 +22,8 @@ class DiffusionGenerator(Generator):
     def make_trainloader(self):
 
         train_dataset = unzip_data(self.train, aug=self.args.aug)
-        train_dataset = filter_data(train_dataset, thershold=self.aug_num+2)
-        train_dataset = DiffusionTrainDataset(train_dataset, self.item_num, self.aug_num, self.max_len)
+        train_dataset = filter_data(train_dataset, thershold=self.aug_num+2) # 过滤数量小于5的user数据。
+        train_dataset = DiffusionTrainDataset(train_dataset, self.item_num, self.aug_num, self.max_len) # 对dataset进行重构，这是个不错的写法
 
         train_dataloader = DataLoader(train_dataset,
                                       sampler=RandomSampler(train_dataset),
@@ -137,11 +137,11 @@ class DiffusionTrainDataset(Dataset):
         inter = self.data[index][self.seq_len:]
         diff_seq = copy.deepcopy(self.data[index][:self.seq_len])
         #diff_seq.reverse()  # whether reverse the generated sequences
-        diff_seq = np.array(diff_seq)
+        diff_seq = np.array(diff_seq) # 正常的seq
 
         seq = np.zeros([self.max_len], dtype=np.int32)
         idx = self.max_len - 1
-        for i in reversed(inter): # ti get the reversed sequence
+        for i in reversed(inter): # ti get the reversed sequence[0,0,0,1,3,5],just reverse
             seq[idx] = i
             idx -= 1
             if idx == -1:
@@ -156,7 +156,7 @@ class DiffusionTrainDataset(Dataset):
         
         positions= positions[-self.max_len:]
         positions = [0] * mask_len + positions
-        positions = np.array(positions)
+        positions = np.array(positions) # 这不是新的generator
 
         return seq, positions, diff_seq
 
