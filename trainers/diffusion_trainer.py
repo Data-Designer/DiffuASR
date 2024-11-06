@@ -170,7 +170,7 @@ class DiffusionTrainer(Trainer):
 
                 logits = self.model.predict(seq, item_indicies)
 
-            for i in range(self.args.aug_num):
+            for i in range(self.args.aug_num): # 居然是循环生成，这样也太消耗资源了。
                 
                 if self.args.model_name == "diffusionlm":
                     logit = logits[i]
