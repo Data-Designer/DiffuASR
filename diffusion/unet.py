@@ -303,7 +303,7 @@ class UNet(nn.Module):
             temb += guide_emb
 
         original_shape = x.shape
-        x = torch.reshape(x, [x.shape[0], -1, self.resolution, self.resolution])
+        x = torch.reshape(x, [x.shape[0], -1, self.resolution, self.resolution]) # 转换为UNet的输入格式
 
         # downsampling
         hs = [self.conv_in(x)]
@@ -337,7 +337,7 @@ class UNet(nn.Module):
         h = nonlinearity(h)
         h = self.conv_out(h)
 
-        h = torch.reshape(h, original_shape)
+        h = torch.reshape(h, original_shape) # 转回序列的格式
 
         return h
 
